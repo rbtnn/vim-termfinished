@@ -1,6 +1,7 @@
 
 # vim-termfinished
 This plugin provides to change the StatusLine highlight when a terminal window finished.
+This plugin does not support Neovim.
 
 ![](https://raw.githubusercontent.com/rbtnn/vim-termfinished/main/termfinished.gif)
 

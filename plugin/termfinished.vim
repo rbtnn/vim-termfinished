@@ -1,6 +1,10 @@
 
 let g:loaded_termfinished = 1
 
+if has('nvim')
+	finish
+endif
+
 function s:exit_cb(channel, msg) abort
 	let info = filter(getwininfo(), { _,x -> x.winid == win_getid() })[0]
 	let st_row = info['winrow'] + info['height']
@@ -19,12 +23,19 @@ function s:exit_cb(channel, msg) abort
 endfunction
 
 function s:TerminalWinOpen() abort
-	if empty(get(job_info(term_getjob(bufnr())), 'exit_cb'))
-		call job_setoptions(term_getjob(bufnr()), { 'exit_cb' : function('s:exit_cb') })
+	if has('nvim')
+	else
+		if empty(get(job_info(term_getjob(bufnr())), 'exit_cb'))
+			call job_setoptions(term_getjob(bufnr()), { 'exit_cb' : function('s:exit_cb') })
+		endif
 	endif
 endfunction
 
 augroup termfinished
 	autocmd!
-	autocmd TerminalWinOpen * :call s:TerminalWinOpen()
+	if has('nvim')
+		autocmd TermOpen        * :call s:TerminalWinOpen()
+	else
+		autocmd TerminalWinOpen * :call s:TerminalWinOpen()
+	endif
 augroup END

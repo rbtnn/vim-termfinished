@@ -5,8 +5,8 @@ if has('nvim')
 	finish
 endif
 
-function s:exit_cb(channel, msg) abort
-	let info = filter(getwininfo(), { _,x -> x.winid == win_getid() })[0]
+function s:exit_cb(winid, channel, msg) abort
+	let info = filter(getwininfo(), { _,x -> x.winid == a:winid })[0]
 	let st_row = info['winrow'] + info['height']
 	let cs = []
 	for st_col in range(info['wincol'], info['wincol'] + info['width'])
@@ -19,23 +19,17 @@ function s:exit_cb(channel, msg) abort
 	if !hlexists('StatusLineTermFinished')
 		highlight! StatusLineTermFinished ctermbg=Red guibg=#ff0000
 	endif
-	let &l:statusline = '%#StatusLineTermFinished#' .. s
+	call win_execute(a:winid, printf('let &l:statusline = %s', string('%#StatusLineTermFinished#' .. s)))
 endfunction
 
 function s:TerminalWinOpen() abort
-	if has('nvim')
-	else
-		if empty(get(job_info(term_getjob(bufnr())), 'exit_cb'))
-			call job_setoptions(term_getjob(bufnr()), { 'exit_cb' : function('s:exit_cb') })
-		endif
+	let j = term_getjob(bufnr())
+	if j != v:null
+		call job_setoptions(j, { 'exit_cb' : function('s:exit_cb', [win_getid()]) })
 	endif
 endfunction
 
 augroup termfinished
 	autocmd!
-	if has('nvim')
-		autocmd TermOpen        * :call s:TerminalWinOpen()
-	else
-		autocmd TerminalWinOpen * :call s:TerminalWinOpen()
-	endif
+	autocmd TerminalWinOpen * :call s:TerminalWinOpen()
 augroup END

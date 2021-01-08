@@ -19,7 +19,9 @@ function s:exit_cb(channel, msg) abort
 endfunction
 
 function s:TerminalWinOpen() abort
-	call job_setoptions(term_getjob(bufnr()), { 'exit_cb' : function('s:exit_cb') })
+	if empty(get(job_info(term_getjob(bufnr())), 'exit_cb'))
+		call job_setoptions(term_getjob(bufnr()), { 'exit_cb' : function('s:exit_cb') })
+	endif
 endfunction
 
 augroup termfinished

@@ -6,20 +6,23 @@ if has('nvim')
 endif
 
 function s:exit_cb(winid, channel, msg) abort
-	let info = filter(getwininfo(), { _,x -> x.winid == a:winid })[0]
-	let st_row = info['winrow'] + info['height']
-	let cs = []
-	for st_col in range(info['wincol'], info['wincol'] + info['width'])
-		let n = screenchar(st_row, st_col)
-		if -1 != n
-			let cs += [nr2char(n)]
+	let infos = filter(getwininfo(), { _,x -> x.winid == a:winid })
+	if 0 < len(infos)
+		let info = infos[0]
+		let st_row = info['winrow'] + info['height']
+		let cs = []
+		for st_col in range(info['wincol'], info['wincol'] + info['width'])
+			let n = screenchar(st_row, st_col)
+			if -1 != n
+				let cs += [nr2char(n)]
+			endif
+		endfor
+		let s = substitute(trim(join(cs, '')), '\[\(running\|normal\)\]$', '[finished]', '')
+		if !hlexists('StatusLineTermFinished')
+			highlight! StatusLineTermFinished ctermbg=Red guibg=#ff0000
 		endif
-	endfor
-	let s = substitute(trim(join(cs, '')), '\[\(running\|normal\)\]$', '[finished]', '')
-	if !hlexists('StatusLineTermFinished')
-		highlight! StatusLineTermFinished ctermbg=Red guibg=#ff0000
+		call win_execute(a:winid, printf('let &l:statusline = %s', string('%#StatusLineTermFinished#' .. s)))
 	endif
-	call win_execute(a:winid, printf('let &l:statusline = %s', string('%#StatusLineTermFinished#' .. s)))
 endfunction
 
 function s:TerminalWinOpen() abort

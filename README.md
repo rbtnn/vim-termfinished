@@ -19,5 +19,8 @@ You can set StatusLineTermFinished highlight.
 
 __Example__
 ```
-highlight! StatusLineTermFinished ctermbg=Red guibg=#ff0000
+augroup user-termfinished
+  autocmd!
+  autocmd ColorScheme * :highlight! StatusLineTermFinished ctermbg=Red guibg=#ff0000
+augroup END
 ```
